@@ -2,119 +2,127 @@
 
 [English](README.md) · [Español](README.es.md) · [Deutsch](README.de.md)
 
-> In Entwicklung.
+> **Nur-Lese- / Portfolio-Repository.** Dieses Repository dokumentiert die Architektur von Jarvis, einem persönlichen agentischen KI-Assistenten. Es ist nicht das reale Produktionssystem: Es handelt sich um eine öffentliche, bereinigte Version, die Designentscheidungen zeigen soll, nicht zur Ausführung gedacht ist. Die private Implementierung wird in einem separaten Repository gepflegt. Siehe [SECURITY.md](SECURITY.md) für Details zu dem, was veröffentlicht wird und was nicht.
 
-Jarvis ist ein persönliches agentisches KI-System, das ich als praktische Lern- und Entwicklungsumgebung aufbaue. Dabei untersuche ich, wie zuverlässige KI-Agenten Kontext behalten, mit Gedächtnis arbeiten, Werkzeuge verwenden und mehrstufige Arbeitsabläufe ausführen können.
+## Inhaltsverzeichnis
 
-Das Projekt entstand aus einer einfachen Frage:
+- [Was Jarvis ist](#was-jarvis-ist)
+- [Welches Problem es löst](#welches-problem-es-löst)
+- [Was ich erforsche](#was-ich-erforsche)
+- [Architektur auf hoher Ebene](#architektur-auf-hoher-ebene)
+- [Zentrale Architekturentscheidungen](#zentrale-architekturentscheidungen)
+- [Technische Dokumentation](#technische-dokumentation)
+- [Was dieses Repository enthält und nicht enthält](#was-dieses-repository-enthält-und-nicht-enthält)
+- [Dokumentationsphilosophie](#dokumentationsphilosophie)
+- [Werkzeuge](#werkzeuge)
+- [Aktueller Status und Hinweis](#aktueller-status-und-hinweis)
 
-**Wie kann ein KI-Assistent mit der Zeit nützlicher werden, ohne ausschließlich von immer größeren Prompts oder unkontrolliertem LLM-Verhalten abhängig zu sein?**
+## Was Jarvis ist
 
-## Was ich untersuche
+Jarvis ist ein persönliches agentisches KI-System, das ich als praktische Lernumgebung aufbaue, um zuverlässige KI-Agenten zu entwerfen: Agenten, die in der Lage sind, Kontext zu behalten, mit persistentem Gedächtnis zu arbeiten, externe Werkzeuge zu nutzen und mehrstufige Arbeitsabläufe ohne ständige Aufsicht auszuführen.
 
-Jarvis dient derzeit als Lern- und Experimentierumgebung für Themen wie:
+Das Projekt entstand aus einer konkreten Frage:
+
+> **Wie kann ein KI-Assistent mit der Zeit nützlicher werden, ohne sich allein auf immer größere Prompts oder auf unkontrolliertes Modellverhalten zu verlassen?**
+
+## Welches Problem es löst
+
+Die meisten LLM-basierten Assistenten verlieren zwischen Sitzungen den Kontext, unterscheiden nicht zwischen "sich an etwas erinnern" und "es im aktuellen Kontextfenster haben" und übertragen dem Modell Entscheidungen, die eigentlich deterministisch sein sollten (Berechnungen, Validierungen, Berechtigungen). Jarvis untersucht, wie diese Verantwortlichkeiten getrennt werden können: was das Modell durch probabilistisches Denken lösen soll und was deterministischer Code mit expliziten Regeln lösen soll.
+
+## Was ich erforsche
+
+Jarvis dient als aktive Lern- und Experimentierumgebung für:
 
 - persistentes Gedächtnis
 - strukturierte Kontextabfrage
-- Trennung zwischen Gedächtnis und aktivem Kontext
+- Trennung von Gedächtnis und aktivem Kontext
 - Werkzeugausführung
-- mehrstufige Workflows
+- mehrstufige Arbeitsabläufe
 - deterministisches vs. probabilistisches Verhalten
-- Berechtigungen und Grenzen von Agenten
+- Berechtigungen und Grenzen des Agenten
 - Validierung und Evaluation
 - wiederverwendbare Architekturmuster
 
-## Aktueller Stand
-
-Jarvis befindet sich in aktiver Entwicklung.
-
-Ziel dieses Repositories ist nicht, ein fertiges Produkt zu präsentieren.
-
-Stattdessen dokumentiere ich hier die Architektur, Entscheidungen, Experimente, Fehler und Erkenntnisse, die während der Entwicklung entstehen.
-
-## Grundidee
-
-Ein LLM sollte nicht für jede Garantie innerhalb eines agentischen Systems verantwortlich sein.
-
-Einige Aufgaben eignen sich für probabilistisches Schlussfolgern.
-
-Andere benötigen deterministische Software, explizite Validierung und kontrollierte Ausführung.
-
-Ein wichtiger Teil dieses Projekts besteht darin herauszufinden, wo diese Grenze verlaufen sollte.
-
 ## Architektur auf hoher Ebene
 
-User  
-↓  
-Interaction Layer  
-↓  
-Context Retrieval  
-↓  
-Memory System  
-↓  
-Reasoning / Decision Layer  
-↓  
-Tool Execution  
-↓  
-Validation  
-↓  
-Result
+```
+Nutzer
+  ↓
+Interaktionsschicht
+  ↓
+Kontextabfrage
+  ↓
+Gedächtnissystem
+  ↓
+Reasoning- / Entscheidungsschicht
+  ↓
+Werkzeugausführung
+  ↓
+Validierung
+  ↓
+Ergebnis
+```
 
-Die genaue Architektur entwickelt sich weiter, während das System getestet und verbessert wird.
+Die genaue Architektur entwickelt sich weiter, während das System in der Praxis getestet wird. Die vollständigen Details, Schicht für Schicht, finden sich in [`docs/architecture/system-overview.md`](docs/architecture/system-overview.md).
 
-## Inhalt dieses Repositories
+## Zentrale Architekturentscheidungen
 
-Dieses öffentliche Repository enthält:
+Für alle, die die technische Tiefe des Projekts bewerten möchten, sind dies die Entscheidungen, die Jarvis am stärksten prägen:
 
-- Architekturdokumentation
-- Designentscheidungen
-- bereinigte Beispiele
-- Evaluationsansätze
-- gewonnene Erkenntnisse
-- wiederverwendbare Muster
+- **Das Modell ist nicht für jede Garantie im System verantwortlich.** Arithmetik, Geschäftsregeln und Berechtigungsgrenzen werden von deterministischem Code ausgeführt; das LLM schlägt vor, der Code entscheidet. Siehe [`docs/05-deterministic-boundaries.md`](docs/05-deterministic-boundaries.md).
+- **Gedächtnis getrennt vom aktiven Kontext.** Etwas zu persistieren bedeutet nicht, dass sich das Modell in jedem Turn daran "erinnert": Es gibt eine explizite Abrufschicht, die entscheidet, was in den Prompt aufgenommen wird und warum. Siehe [`docs/02-memory-architecture.md`](docs/02-memory-architecture.md) und [`docs/03-context-retrieval.md`](docs/03-context-retrieval.md).
+- **Geheimnisse erreichen das Modell nie.** Das LLM erhält Zugriff auf eine *Fähigkeit* (ein Werkzeug), nicht auf das Geheimnis, das dieses Werkzeug zur Ausführung benötigt. Siehe den Abschnitt über Geheimnisse in [`docs/04-tool-execution.md`](docs/04-tool-execution.md) und in [SECURITY.md](SECURITY.md).
+- **Alles, was entscheidet, vorhersagt oder ausführt, wird validiert, bevor man ihm vertraut.** Evaluationsansätze und explizite Abnahmekriterien, bevor eine neue Fähigkeit als gut befunden wird. Siehe [`docs/06-evaluations.md`](docs/06-evaluations.md).
+- **Fehler werden dokumentiert, nicht verborgen.** Jede gelernte Lektion — einschließlich dessen, was nicht funktioniert hat — wird als Grundlage für die nächste Entscheidung festgehalten. Siehe [`docs/07-lessons-learned.md`](docs/07-lessons-learned.md).
 
-Bewusst **nicht enthalten** sind:
+## Technische Dokumentation
 
-- persönliche Erinnerungen
-- private Benutzerdaten
-- Zugangsdaten oder API-Schlüssel
-- Produktionskonfigurationen
-- private Prompts
-- sensible Logs
+| Dokument | Inhalt |
+|---|---|
+| [`docs/01-overview.md`](docs/01-overview.md) | Überblick über die Architektur |
+| [`docs/02-memory-architecture.md`](docs/02-memory-architecture.md) | Architektur des persistenten Gedächtnisses |
+| [`docs/03-context-retrieval.md`](docs/03-context-retrieval.md) | Strukturierte Kontextabfrage |
+| [`docs/04-tool-execution.md`](docs/04-tool-execution.md) | Werkzeugausführung und Umgang mit Geheimnissen |
+| [`docs/05-deterministic-boundaries.md`](docs/05-deterministic-boundaries.md) | Grenzen zwischen deterministisch und probabilistisch |
+| [`docs/06-evaluations.md`](docs/06-evaluations.md) | Evaluationsmethoden und Abnahmekriterien |
+| [`docs/07-lessons-learned.md`](docs/07-lessons-learned.md) | Gelernte Lektionen (lebendes Dokument) |
+| [`docs/architecture/system-overview.md`](docs/architecture/system-overview.md) | Vollständige Systemarchitektur, Schicht für Schicht |
 
-## Warum ich Jarvis entwickle
+## Was dieses Repository enthält und nicht enthält
 
-Ich entwickle mein Profil zunehmend in Richtung künstliche Intelligenz, Automatisierung und digitale Systeme.
+Dieses öffentliche Repository enthält architektonische Dokumentation, Designentscheidungen, bereinigte Beispiele, Evaluationsansätze, gelernte Lektionen und wiederverwendbare Muster.
 
-Anstatt ausschließlich über Kurse zu lernen, nutze ich Jarvis als praktisches Projekt, in dem ich reale Architekturprobleme untersuchen, verschiedene Ansätze testen und dokumentieren kann, was funktioniert und was nicht.
+Absichtlich enthält es **nicht** persönliche Erinnerungen, private Nutzerdaten, Zugangsdaten oder API-Schlüssel, Produktionskonfiguration, private Prompts oder sensible Protokolle.
 
-Langfristig möchte ich die Erkenntnisse aus Jarvis in einen wiederverwendbaren Blueprint für persönliche oder domänenspezifische KI-Agenten überführen.
+Die vollständigen Details darüber, was veröffentlicht wird, was nicht, und warum, stehen in [SECURITY.md](SECURITY.md).
+
+## Dokumentationsphilosophie
+
+Für jede wichtige Komponente versuche ich zu dokumentieren:
+
+1. Das Problem, das sie löst
+2. Warum die Komponente existiert
+3. Erwogene Alternativen
+4. Der gewählte Ansatz
+5. Was deterministisch sein muss
+6. Was probabilistisch bleiben kann
+7. Fehlermodi
+8. Tests und Evaluationen
+9. Abnahmekriterien
+10. Wann das Muster wiederverwendet werden sollte und wann nicht
 
 ## Werkzeuge
 
-Für Entwicklung und Experimente nutze ich unter anderem:
+Das Projekt wird mit Werkzeugen wie den folgenden entwickelt und erforscht:
 
 - Claude Code
 - OpenAI Codex
 - Git
 - GitHub
-- Python sowie weitere Werkzeuge, wenn sie sinnvoll sind
+- Python und andere Hilfswerkzeuge, sofern benötigt
 
-## Dokumentationsprinzip
+## Aktueller Status und Hinweis
 
-Für jede größere Komponente versuche ich folgende Punkte zu dokumentieren:
+Jarvis befindet sich in aktiver Entwicklung. Das Ziel dieses Repositorys ist nicht, ein fertiges Produkt zu präsentieren, sondern die Architektur, die Entscheidungen, die Experimente, die Fehler und die während des Aufbaus des Systems gelernten Lektionen zu dokumentieren.
 
-1. Welches Problem sie löst
-2. Warum die Komponente existiert
-3. Welche Alternativen betrachtet wurden
-4. Welche Lösung gewählt wurde
-5. Was deterministisch sein sollte
-6. Was probabilistisch bleiben kann
-7. Mögliche Fehlermodi
-8. Tests und Evaluationen
-9. Akzeptanzkriterien
-10. Wann das Muster wiederverwendet werden sollte und wann nicht
-
-## Hinweis
-
-Jarvis ist ein experimentelles persönliches Projekt und sollte in seinem aktuellen Zustand nicht als produktionsreifer autonomer Agent betrachtet werden.
+Jarvis ist ein persönliches, experimentelles Projekt. In seinem aktuellen Zustand sollte es nicht als produktionsreifer autonomer Agent betrachtet werden, noch sollte dieses Repository als formale Sicherheitsprüfung interpretiert werden (siehe [SECURITY.md](SECURITY.md)).
