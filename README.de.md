@@ -126,3 +126,7 @@ Das Projekt wird mit Werkzeugen wie den folgenden entwickelt und erforscht:
 Jarvis befindet sich in aktiver Entwicklung. Das Ziel dieses Repositorys ist nicht, ein fertiges Produkt zu präsentieren, sondern die Architektur, die Entscheidungen, die Experimente, die Fehler und die während des Aufbaus des Systems gelernten Lektionen zu dokumentieren.
 
 Jarvis ist ein persönliches, experimentelles Projekt. In seinem aktuellen Zustand sollte es nicht als produktionsreifer autonomer Agent betrachtet werden, noch sollte dieses Repository als formale Sicherheitsprüfung interpretiert werden (siehe [SECURITY.md](SECURITY.md)).
+
+---
+
+**Autor:** [Engelbert Huber](https://github.com/Eiaell) — weitere Projekte und Kontext auf meinem [GitHub-Profil](https://github.com/Eiaell).
